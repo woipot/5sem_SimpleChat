@@ -6,9 +6,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    presenter_ = new chat_presenter();
 }
 
 MainWindow::~MainWindow()
 {
+    delete presenter_;
     delete ui;
 }

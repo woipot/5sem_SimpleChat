@@ -26,10 +26,14 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    chat_presenter.cpp \
+    chat_model.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    chat_presenter.h \
+    chat_model.h
 
 FORMS += \
         mainwindow.ui
