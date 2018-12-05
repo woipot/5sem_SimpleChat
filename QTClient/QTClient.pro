@@ -29,14 +29,16 @@ SOURCES += \
         mainwindow.cpp \
     chat_presenter.cpp \
     chat_model.cpp \
-    connectdialog.cpp
+    connectdialog.cpp \
+    chat_socket.cpp
 
 HEADERS += \
         mainwindow.h \
     chat_presenter.h \
     chat_model.h \
     connectdialog.h \
-    connect_params.h
+    connect_params.h \
+    chat_socket.h
 
 FORMS += \
         mainwindow.ui \

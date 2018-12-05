@@ -1,6 +1,7 @@
 import socket
 import sys
 import datetime
+import re
 from Sources.ServerSources.Client import Client
 from threading import Thread
 from colorama import Fore
@@ -8,6 +9,13 @@ from colorama import Fore
 
 class Server:
     BUFSIZE = 1024
+    COMMANDSIZE = 1
+
+    commands = {
+        'msg': '0',
+        'validate': '1',
+        'user_list': '2'
+    }
 
     clients = []
 
@@ -29,11 +37,15 @@ class Server:
                 (client_socket, address) = self.server.accept()
                 print(Fore.GREEN + "#Info: new client was founded")
                 client = Client(client_socket, address)
+                # Client Connected
+                is_success_validate = self.validate_user(client)
+
+                if not is_success_validate:
+                    self.silent_close(client)
+                    continue
+
                 # Adding client to clients list
                 self.clients.append(client)
-
-                # Client Connected
-                self.validate_user(client)
 
                 # Receiving data from client
                 Thread(target=self.process_client, args=(client,)).start()
@@ -43,13 +55,15 @@ class Server:
     def process_client(self, client: Client):
         try:
             while True:
-                msg = client.socket.recv(self.BUFSIZE)
-                decoded_msg = msg.decode(encoding='utf-8')
-                if decoded_msg != '':
+                b_cmd = client.socket.recv(self.COMMANDSIZE)
+                decoded_cmd = b_cmd.decode(encoding='utf-8')
+
+                if decoded_cmd == self.commands['msg']:
+                    b_msg = client.socket.recv(self.BUFSIZE)
+                    decoded_msg = b_msg.decode(encoding='utf-8')
                     self.on_message(client, decoded_msg)
 
-                elif decoded_msg != {quit}:
-                    self.on_close(client)
+                elif decoded_cmd != {quit}:
                     break
 
         except Exception as ex:
@@ -58,6 +72,7 @@ class Server:
 
         print(Fore.GREEN + "#Info: client-> %s : %s disconnect from server (%s)"
               % (client.socket, client.address, client.screen_name))
+        self.close_client(client)
 
     def broadcast(self, message: str):
         # Sending message to all clients
@@ -65,18 +80,66 @@ class Server:
             client.send(message)
 
     def validate_user(self, client: Client):
-        print(Fore.GREEN + "#Info: Client accepted %s %s" % (client.socket, client.address))
+        print(Fore.CYAN + "#Info: start validate")
+        b_cmd = client.socket.recv(self.COMMANDSIZE)
+        decoded_cmd = b_cmd.decode(encoding='utf-8')
+
+        is_success = True
+
+        if decoded_cmd == self.commands['validate']:
+            b_user_name = client.socket.recv(self.BUFSIZE)
+            username = b_user_name.decode(encoding='utf-8')
+
+            validate_result = self.validate_username(username)
+            is_unique = self.validate_to_unique(username)
+
+            if validate_result and is_unique:
+                today = datetime.datetime.today()
+                processed_msg = '\t[%s] User <%s> joined the chat.' % (today.strftime("%Y/%m/%d %H.%M"), username)
+                self.broadcast(processed_msg)
+
+                print(Fore.YELLOW + '#Info: Client accepted %s %s' % (client.socket, client.address))
+
+            elif not validate_result:
+                client.send('Validate error (name verification)')
+                is_success = False
+            else:
+                client.send('Validate error (name is not unique)')
+                is_success = False
+        else:
+            client.send('Validate error (validate command)')
+            is_success = False
+
+        print(Fore.CYAN + '#Info: validate is: %s' % is_success)
+        return is_success
 
     def on_message(self, client: Client, message):
         today = datetime.datetime.today()
         processed_msg = "[%s]<%s>: %s" % (today.strftime("%Y/%m/%d %H.%M"), client.screen_name, message)
         self.broadcast(processed_msg)
 
-    def on_close(self, client: Client):
-        client.send("{quit}")
-        self.close_client(client)
+    def silent_close(self, client: Client):
+        print(Fore.GREEN + "#Info: client-> %s : %s SILENT disconnect from server (%s)"
+              % (client.socket, client.address, client.screen_name))
+        client.socket.close()
+        if client in self.clients:
+            self.clients.remove(client)
 
     def close_client(self, client: Client):
         client.socket.close()
         self.clients.remove(client)
-        self.broadcast("-----#Info <>: %s has left the chat.-----" % client.screen_name)
+
+        today = datetime.datetime.today()
+        processed_msg = '\t[%s] User <%s> has left the chat.' % (today.strftime("%Y/%m/%d %H.%M"), client.screen_name)
+        self.broadcast(processed_msg)
+
+    @staticmethod
+    def validate_username(name: str):
+        result = bool(re.match(r"^[a-z|A-Z|_]{1}[a-z|A-Z|0-9|-|_]{3,19}$", name))
+        return result
+
+    def validate_to_unique(self, name: str):
+        for client in self.clients:
+            if client.screen_name == name:
+                return False
+        return True

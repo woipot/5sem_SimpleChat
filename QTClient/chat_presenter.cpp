@@ -63,9 +63,9 @@ bool chat_presenter::save_dialogs(QString patch)
     return is_successful;
 }
 
-void chat_presenter::connect_to(const QString &host, unsigned short port, QString username)
+void chat_presenter::connect_to(const QString &host, unsigned short port,const QString &username)
 {
-    chat_model_->connect(host, port);
+    chat_model_->connect_as(username, host, port);
 }
 
 void chat_presenter::disconnect()
@@ -79,7 +79,7 @@ void chat_presenter::send_message()
 
     if (!msg.isEmpty())
     {
-        chat_model_->send_msg(msg);
+        chat_model_->send(msg);
         message_edit_->clear();
     }
 }

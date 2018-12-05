@@ -42,7 +42,7 @@ public:
     void clear_chat();
     bool save_dialogs(QString patch);
 
-    void connect_to(const QString &host, unsigned short port, QString username);
+    void connect_to(const QString &host, unsigned short port, const QString &username);
     void disconnect();
 
     void send_message();
