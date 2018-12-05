@@ -42,19 +42,22 @@ class Server:
                 print(Fore.GREEN + "#Info: new client was founded")
                 client = Client(client_socket, address)
                 # Client Connected
-                is_success_validate = self.validate_user(client)
-
-                if not is_success_validate:
-                    self.silent_close(client)
-                    continue
-
-                # Adding client to clients list
-                self.clients.append(client)
-
-                # Receiving data from client
-                Thread(target=self.process_client, args=(client,)).start()
+                Thread(target=self.accept_one, args=(client,)).start()
             except Exception as ex:
                 print(Fore.RED + "#Error: can't accept client: %s" % ex)
+
+    def accept_one(self, client: Client):
+        is_success_validate = self.validate_user(client)
+
+        if not is_success_validate:
+            self.silent_close(client)
+            return
+            
+        # Adding client to clients list
+        self.clients.append(client)
+
+        # Receiving data from client
+        Thread(target=self.process_client, args=(client,)).start()
 
     def process_client(self, client: Client):
         try:
