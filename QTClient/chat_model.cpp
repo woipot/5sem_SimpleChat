@@ -3,7 +3,7 @@
 
 chat_model::chat_model() : chat_socket ()
 {
-
+    error_bufer_ = "";
 }
 
 chat_model::~chat_model()

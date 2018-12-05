@@ -12,6 +12,8 @@
 #include "QTextStream"
 #include "QObject"
 
+#include "QMessageBox"
+
 
 class chat_presenter : public QObject
 {
@@ -49,6 +51,7 @@ public:
 
 public slots:
     void print_msg(QString msg);
+    void take_error(QString msg);
 
     void on_connect();
     void on_disconnect();

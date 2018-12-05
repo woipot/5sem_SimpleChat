@@ -50,12 +50,14 @@ void ConnectDialog::button_accept()
     {
         QMessageBox msg;
         msg.setInformativeText("#Error: vrong host name");
+        msg.setIcon(QMessageBox::Warning);
         msg.exec();
     }
     else if(ui->nameEdit->text().trimmed().isEmpty())
     {
         QMessageBox msg;
         msg.setInformativeText("#Error: empty field <name>");
+        msg.setIcon(QMessageBox::Warning);
         msg.exec();
     }
     else

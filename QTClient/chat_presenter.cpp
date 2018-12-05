@@ -4,7 +4,7 @@ chat_presenter::chat_presenter()
 {
     chat_model_ = new chat_model();
     QObject::connect(chat_model_, SIGNAL(new_msg(QString)), this, SLOT(print_msg(QString)));
-    QObject::connect(chat_model_, SIGNAL(error(QString)), this, SLOT(print_msg(QString)));
+    QObject::connect(chat_model_, SIGNAL(error(QString)), this, SLOT(take_error(QString)));
 
     QObject::connect(chat_model_, SIGNAL(connection_success()), this, SLOT(on_connect()));
     QObject::connect(chat_model_, SIGNAL(disconnection_success()), this, SLOT(on_disconnect()));
@@ -88,7 +88,21 @@ void chat_presenter::send_message()
 //-----------------------punblic slots
 void chat_presenter::print_msg(QString msg)
 {
-    messages_browser_->append(msg);
+    auto command = msg.at(0);
+    auto proccessed_msg = msg.remove(0, 1);
+
+    if(command == '0')
+        messages_browser_->append(proccessed_msg);
+    else
+        take_error(proccessed_msg);
+}
+
+void chat_presenter::take_error(QString msg)
+{
+    QMessageBox mb;
+    mb.setIcon(QMessageBox::Critical);
+    mb.setInformativeText(msg);
+    mb.exec();
 }
 
 void chat_presenter::on_connect()

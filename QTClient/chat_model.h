@@ -5,7 +5,7 @@
 
 class chat_model : public chat_socket
 {
-
+    QString error_bufer_;
 public:
     chat_model();
     ~chat_model();

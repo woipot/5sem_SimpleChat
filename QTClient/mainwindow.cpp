@@ -44,6 +44,7 @@ void MainWindow::on_save()
         {
             QMessageBox msg;
             msg.setInformativeText("#Error: cannot saave to this file");
+            msg.setIcon(QMessageBox::Critical);
             msg.exec();
         }
     }
@@ -75,6 +76,7 @@ void MainWindow::on_show_about()
 {
     QMessageBox msg;
     msg.setInformativeText("Powered by woipot");
+    msg.setIcon(QMessageBox::Information);
     msg.exec();
 }
 

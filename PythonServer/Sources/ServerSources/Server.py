@@ -1,5 +1,4 @@
 import socket
-import sys
 import datetime
 import re
 from Sources.ServerSources.Client import Client
@@ -15,6 +14,11 @@ class Server:
         'msg': '0',
         'validate': '1',
         'user_list': '2'
+    }
+
+    back_commands = {
+        'msg': '0',
+        'error': '1',
     }
 
     clients = []
@@ -77,7 +81,7 @@ class Server:
     def broadcast(self, message: str):
         # Sending message to all clients
         for client in self.clients:
-            client.send(message)
+            client.send_command(message, self.back_commands['msg'])
 
     def validate_user(self, client: Client):
         print(Fore.CYAN + "#Info: start validate")
@@ -99,18 +103,17 @@ class Server:
                 self.broadcast(processed_msg)
 
                 print(Fore.YELLOW + '#Info: Client accepted %s %s' % (client.socket, client.address))
-
+                client.screen_name = username;
             elif not validate_result:
-                client.send('Validate error (name verification)')
+                client.send_command('Validate error (name verification)', self.back_commands['error'])
                 is_success = False
             else:
-                client.send('Validate error (name is not unique)')
+                client.send_command('Validate error (name is not unique)', self.back_commands['error'])
                 is_success = False
         else:
-            client.send('Validate error (validate command)')
+            client.send_command('Validate error (validate command)', self.back_commands['error'])
             is_success = False
 
-        print(Fore.CYAN + '#Info: validate is: %s' % is_success)
         return is_success
 
     def on_message(self, client: Client, message):
