@@ -7,7 +7,7 @@ class Client:
 
     # Send message to Client
     def send(self, data: str):
-        self.socket.send(bytes(data, "utf8"))
+        self.socket.send(data.encode('utf-8'))
 
     def set_name(self, name):
         self.screen_name = name;

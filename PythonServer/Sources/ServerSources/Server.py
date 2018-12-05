@@ -1,5 +1,6 @@
 import socket
 import sys
+import datetime
 from Sources.ServerSources.Client import Client
 from threading import Thread
 from colorama import Fore
@@ -43,11 +44,11 @@ class Server:
         try:
             while True:
                 msg = client.socket.recv(self.BUFSIZE)
+                decoded_msg = msg.decode(encoding='utf-8')
+                if decoded_msg != '':
+                    self.on_message(client, decoded_msg)
 
-                if msg.decode != '':
-                    self.on_message(client, msg.decode())
-
-                elif msg != bytes("{quit}", "utf8"):
+                elif decoded_msg != {quit}:
                     self.on_close(client)
                     break
 
@@ -67,7 +68,8 @@ class Server:
         print(Fore.GREEN + "#Info: Client accepted %s %s" % (client.socket, client.address))
 
     def on_message(self, client: Client, message):
-        processed_msg = "<%s>: %s" % (client.screen_name, message)
+        today = datetime.datetime.today()
+        processed_msg = "[%s]<%s>: %s" % (today.strftime("%Y/%m/%d %H.%M"), client.screen_name, message)
         self.broadcast(processed_msg)
 
     def on_close(self, client: Client):

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -28,15 +28,19 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     chat_presenter.cpp \
-    chat_model.cpp
+    chat_model.cpp \
+    connectdialog.cpp
 
 HEADERS += \
         mainwindow.h \
     chat_presenter.h \
-    chat_model.h
+    chat_model.h \
+    connectdialog.h \
+    connect_params.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    connectdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
